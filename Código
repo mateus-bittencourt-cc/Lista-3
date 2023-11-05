@@ -1,0 +1,190 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_SIZE 100
+
+// Definição da estrutura para o nó do livro
+typedef struct {
+    char title[50];
+} Book;
+
+// Definição da estrutura para a pilha
+typedef struct {
+    Book books[MAX_SIZE];
+    int top;
+} Stack;
+
+// Definição da estrutura para a fila
+typedef struct {
+    Book books[MAX_SIZE];
+    int front, rear;
+} Queue;
+
+// Inicialização da pilha
+void initializeStack(Stack *stack) {
+    stack->top = -1;
+}
+
+// Função para empilhar um livro na pilha
+void push(Stack *stack, Book book) {
+    if (stack->top == MAX_SIZE - 1) {
+        printf("A pilha está cheia. Não é possível inserir mais livros.\n");
+    } else {
+        stack->top++;
+        stack->books[stack->top] = book;
+        printf("Livro inserido na pilha com sucesso.\n");
+    }
+}
+
+// Função para desempilhar um livro da pilha
+void pop(Stack *stack) {
+    if (stack->top == -1) {
+        printf("A pilha está vazia. Não há livros para remover.\n");
+    } else {
+        printf("Livro removido da pilha: %s\n", stack->books[stack->top].title);
+        stack->top--;
+    }
+}
+
+// Inicialização da fila
+void initializeQueue(Queue *queue) {
+    queue->front = 0;
+    queue->rear = -1;
+}
+
+// Função para enfileirar um livro na fila
+void enqueue(Queue *queue, Book book) {
+    if (queue->rear == MAX_SIZE - 1) {
+        printf("A fila está cheia. Não é possível inserir mais livros.\n");
+    } else {
+        queue->rear++;
+        queue->books[queue->rear] = book;
+        printf("Livro inserido na fila com sucesso.\n");
+    }
+}
+
+// Função para desenfileirar um livro da fila
+void dequeue(Queue *queue) {
+    if (queue->front > queue->rear) {
+        printf("A fila está vazia. Não há livros para remover.\n");
+    } else {
+        printf("Livro removido da fila: %s\n", queue->books[queue->front].title);
+        queue->front++;
+    }
+}
+
+// Função para exibir os livros na pilha
+void displayStack(Stack *stack) {
+    if (stack->top == -1) {
+        printf("A pilha está vazia.\n");
+    } else {
+        printf("Livros na pilha:\n");
+        for (int i = stack->top; i >= 0; i--) {
+            printf("%s\n", stack->books[i].title);
+        }
+    }
+}
+
+// Função para exibir os livros na fila
+void displayQueue(Queue *queue) {
+    if (queue->front > queue->rear) {
+        printf("A fila está vazia.\n");
+    } else {
+        printf("Livros na fila:\n");
+        for (int i = queue->front; i <= queue->rear; i++) {
+            printf("%s\n", queue->books[i].title);
+        }
+    }
+}
+
+int main() {
+    FILE *file;
+    char filename[20];
+
+    // Leitura do arquivo fila.txt e inserção na fila de livros
+    Queue queue;
+    initializeQueue(&queue);
+    printf("Lendo o arquivo fila.txt...\n");
+    printf("Inserindo livros na fila...\n");
+    strcpy(filename, "fila.txt");
+    file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Erro ao abrir o arquivo %s\n", filename);
+        return -1;
+    }
+    while (fgets(queue.books[queue.rear + 1].title, 50, file) != NULL) {
+        queue.rear++;
+        queue.books[queue.rear].title[strcspn(queue.books[queue.rear].title, "\n")] = '\0'; // Remove a quebra de linha
+    }
+    fclose(file);
+
+    // Leitura do arquivo pilha.txt e inserção na pilha de livros
+    Stack stack;
+    initializeStack(&stack);
+    printf("\nLendo o arquivo pilha.txt...\n");
+    printf("Inserindo livros na pilha...\n");
+    strcpy(filename, "pilha.txt");
+    file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Erro ao abrir o arquivo %s\n", filename);
+        return -1;
+    }
+    while (fgets(stack.books[stack.top + 1].title, 50, file) != NULL) {
+        stack.top++;
+        stack.books[stack.top].title[strcspn(stack.books[stack.top].title, "\n")] = '\0'; // Remove a quebra de linha
+    }
+    fclose(file);
+
+    int choice;
+    Book newBook;
+    
+    // Menu interativo
+    do {
+        printf("\nEscolha uma opção:\n");
+        printf("1. Exibir livros na fila\n");
+        printf("2. Inserir novo livro na fila\n");
+        printf("3. Inserir novo livro na pilha\n");
+        printf("4. Remover livro da fila\n");
+        printf("5. Remover livro da pilha\n");
+        printf("6. Exibir livros na pilha\n");
+        printf("7. Sair\n");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                displayQueue(&queue);
+                break;
+            case 2:
+                printf("Digite o nome do novo livro a ser inserido na fila: ");
+                getchar(); // Limpar o buffer do teclado
+                fgets(newBook.title, 50, stdin);
+                newBook.title[strcspn(newBook.title, "\n")] = '\0'; // Remove a quebra de linha
+                enqueue(&queue, newBook);
+                break;
+            case 3:
+                printf("Digite o nome do novo livro a ser inserido na pilha: ");
+                getchar(); // Limpar o buffer do teclado
+                fgets(newBook.title, 50, stdin);
+                newBook.title[strcspn(newBook.title, "\n")] = '\0'; // Remove a quebra de linha
+                push(&stack, newBook);
+                break;
+            case 4:
+                dequeue(&queue);
+                break;
+            case 5:
+                pop(&stack);
+                break;
+            case 6:
+                displayStack(&stack);
+                break;
+            case 7:
+                printf("Saindo do programa. Até mais!\n");
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    } while (choice != 7);
+
+    return 0;
+}
